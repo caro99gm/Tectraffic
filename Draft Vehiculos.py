@@ -1,4 +1,3 @@
-#instalar agentpy
 
 
 # Model design
@@ -14,10 +13,6 @@ from IPython.display import HTML
 
 
 
-#NOTA
-#me queda mucha duda en como desplazamos el carro si en X O Z
-#tambien lo del update, creo que lo podemos borrar o no se que
-#guardariamos ahÃ­
 class agenteVehiculo(ap.Agent):
 
     def setup(self):
@@ -80,7 +75,6 @@ class modeloVehiculo(ap.Model):
         self.agents.actualizarPosicion()
     
     def update(self):
-        #Creo que este puede quedar vacio
         self.agents.record('posX', self.agents.posX)  # Record variable
         self.agents.record('posZ', self.agents.posZ)
 
@@ -107,8 +101,11 @@ model = modeloVehiculo(parameters)
 results = model.run()
 
 #results = exp.run()
+print("Impresion de la info del tipo de dato result")
 print(results)
+print("Impresion de la info del reporte en result")
 print(results.reporters)
+print("Impresion de la información de la simulación")
 print(results.info)
 #sample = ap.Sample(parameters, n=5)
 #exp = ap.Experiment(modeloVehiculo, sample, iterations=2, record=True)

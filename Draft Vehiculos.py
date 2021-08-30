@@ -11,8 +11,49 @@ import IPython
 from random import choice
 from IPython.display import HTML
 
-
-
+class agenteSemaforo(ap.Agent):
+    def setup (self):
+        self.grid = self.model.grid
+        self.random = self.model.random
+        self.group = self.random.choice(range(self.p.n_groups))
+        
+    def setupParameters(self, posX, posY, tiempoEspera, tiempoActivo, tiempoAmarillo, luzVerde, luzAmarillo, luzRojo):
+        self.posX=posX #int
+        self.posY=posY #int
+        self.tiempoEspera=tiempoEspera #int (segundos) 
+        self.tiempoActivo=tiempoActivo #int (segundos)
+        self.tiempoAmarillo=tiempoAmarillo #int (segundos)
+        self.luzVerde=luzVerde #bool
+        self.luzAmarillo=luzAmarillo #bool
+        self.luzRojo=luzRojo#bool
+        #self.semaforos[]=semaforos #array de semaforos, para comunicarse con otros agentes
+        
+    def actualizarTiempoEspera(self):
+        total=0
+        #for i in self.semaforos:
+            #total= total + self.semaforos[i].tiempoActivo
+        tiempoEspera=total
+        
+    def actualizarTiempoActivo(self, cantidadDeVehiculos):
+        self.tiempoActivo=cantidadDeVehiculos*5
+        
+    def actualizarTiempos(cantidadDeVehiculos):
+        self.actualizarTiempoActivo(cantidadDeVehiculos)
+        self.actualizarTiempoEspera()
+        
+    #def encenderLuzVerde():
+        
+    #def encenderLuzAmarilla():
+    
+    #def encenderLuzRoja():
+            
+    def prenderSemaforo():
+        self.actualizarTiempos(cantidadDeVehiculos)
+        #self.encenderLuzVerde()
+        #self.encenderLuzAmarilla()
+        #self.encenderLuzRoja()
+        
+        
 class agenteVehiculo(ap.Agent):
 
     def setup(self):
@@ -22,11 +63,11 @@ class agenteVehiculo(ap.Agent):
         # Inicializar un agente con parametros
 
         
-    def setup_parameters(self, velocidad, posX, posZ):
-        self.velocidad = velocidad #la considero en km/h
-        self.posX=posX #la considero como metros
-        self.posY=0 #           =
-        self.posZ=posZ #           =
+    def setupParameters(self, velocidad, posX, posZ):
+        self.velocidad = velocidad #bool 
+        self.posX=posX #int
+        self.posY=0 #int
+        self.posZ=posZ #int
         
 
     def modificarVelocidad(self, velocidad):
@@ -67,39 +108,43 @@ class modeloVehiculo(ap.Model):
         s= self.p.size
         
         self.grid = ap.Grid(self, (s,s), track_empty=True)
-        self.agents = ap.AgentList(self, self.p.agents, agenteVehiculo)
-        self.grid.add_agents(self.agents, positions=[(0,0),(0,0),(0,0)]) #DEFINIR LAS POSICIONES INICIALES DE LOS AGENTES
-        self.agents.setup_parameters(self.p.velocidad,self.p.posX,self.p.posZ)
+        self.vehiculos = ap.AgentList(self, self.p.agentsCarro, agenteVehiculo)
+        self.grid.add_agents(self.vehiculos, positions=[(0,0),(0,0),(0,0)]) #DEFINIR LAS POSICIONES INICIALES DE LOS AGENTES
+        self.vehiculos.setupParameters(self.p.velocidad,self.p.posX,self.p.posZ)
+        self.semaforos = ap.AgentList(self, self.p.agentsSemaforo, agenteSemaforo)
+        self.grid.add_agents(self.semaforos, positions=[(4,4),(6,4),(4,6),(6,6)])
+        #self.agents.setupParameters(self.p.velocidad,self.p.posX,self.p.posZ)
 
     def step(self):
         # Called at every simulation step
         #self.agents.leerSemaforo(agenteSemaforo)
         #self.agents.detectarVehiculos(agenteVehiculo)
-        if(self.agents.select((self.agents.posX < s) or (self.agents.posZ < s))): #HACER QUE SE MUEVAN HASTA QUE LLEGAN A (9,9)
+        if(self.vehiculos.select((self.vehiculos.posX < s) or (self.vehiculos.posZ < s))): #HACER QUE SE MUEVAN HASTA QUE LLEGAN A (9,9)
             nueva_velocidad=random.randrange(10)
-            self.agents.modificarVelocidad(nueva_velocidad)
-            self.agents.actualizarPosicion()
+            self.vehiculos.modificarVelocidad(nueva_velocidad)
+            self.vehiculos.actualizarPosicion()
         #IMPRESION DE LAS POSICIONES DE LOS AGENTES
         for i in self.grid.positions:
             print (self.grid.positions[i])
     
         
     def update(self):
-        self.agents.record('posX', self.agents.posX)  # Record variable
-        self.agents.record('posZ', self.agents.posZ)
+        self.vehiculos.record('posX', self.vehiculos.posX)  # Record variable
+        self.vehiculos.record('posZ', self.vehiculos.posZ)
 
     def end(self):
         # del agents
         # Called at the end of the simulation
-        self.report('Distancia recorrida por los vehiculos en el eje x', self.agents.posX)
-        self.report('Distancia recorrida por los vehiculos en el eje z', self.agents.posZ)# Report a simulation result
+        self.report('Distancia recorrida por los vehiculos en el eje x', self.vehiculos.posX)
+        self.report('Distancia recorrida por los vehiculos en el eje z', self.vehiculos.posZ)# Report a simulation result
         
 parameters = {
     'size':10,
     'velocidad':0,
     'posX':0,
     'posZ':0,
-    'agents':3,
+    'agentsCarro':3,
+    'agentsSemaforo':4,
     'steps':13,
     'n_groups':3
 }

@@ -11,11 +11,20 @@ import IPython
 from random import choice
 from IPython.display import HTML
 
+def llenarTuplaPosicionesCarros(cCarros):
+    contador=0
+    origenes=[(0,5),(6,0),(5,11),(11,6)]
+    tupla=[]
+    while(contador!=cCarros):
+        tupla.append(random.choice(origenes))
+        contador=contador+1
+    return tupla
+
+
 class agenteSemaforo(ap.Agent):
     def setup (self):
         self.grid = self.model.grid
         self.random = self.model.random
-        self.group = self.random.choice(range(self.p.n_groups))
         
     def setupParameters(self, posX, posY, tiempoEspera, tiempoActivo, tiempoAmarillo, luzVerde, luzAmarillo, luzRojo):
         self.posX=posX #int
@@ -59,15 +68,16 @@ class agenteVehiculo(ap.Agent):
     def setup(self):
         self.grid = self.model.grid
         self.random = self.model.random
-        self.group = self.random.choice(range(self.p.n_groups))
         # Inicializar un agente con parametros
 
         
-    def setupParameters(self, velocidad, posX, posZ):
+    def setupParameters(self, velocidad, coordenada):
         self.velocidad = velocidad #bool 
-        self.posX=posX #int
+        self.posX=coordenada[0] #int
         self.posY=0 #int
-        self.posZ=posZ #int
+        self.posZ=coordenada[1] #int
+        self.posXInicial=coordenada[0]
+        self.posZInicial=coordenada[1]
         
 
     def modificarVelocidad(self, velocidad):
@@ -75,12 +85,31 @@ class agenteVehiculo(ap.Agent):
         self.velocidad=velocidad
     
     def actualizarPosicion(self):
-        self.posX=self.posX+1
-        self.posZ=self.posZ+1
+        #Ir a la izquierda
+        if(self.posXInicial==11 and self.posZInicial==6 and self.posX!=0):
+            self.posX=self.posX-1
+            self.grid.move_by(self, (-1,0))
+        
+        #ir hacia abajo
+        elif(self.posXInicial==5 and self.posZInicial==11 and self.posZ!=0):
+            self.posZ=self.posZ-1
+            self.grid.move_by(self, (0,-1))
+        
+        #ir a la derecha 
+        elif(self.posXInicial==0 and self.posZInicial==5 and self.posX!=11):
+            self.posX=self.posX+1
+            self.grid.move_by(self, (1,0))
+        
+        #ir hacia arriba
+        elif(self.posXInicial==6 and self.posZInicial==0 and self.posZ!=11):
+            self.posZ=self.posZ+1
+            self.grid.move_by(self, (0,1))
+        
+        
         #DIFERENCIA ENTRE MOVE TO Y MOVE BY
         #MOVE TO LE DAS LA CORDENADA A DONDE LO QUIERAS MOVER EJ. self.grid.move_by(self, (self.posX,self.posZ)) 
         #MOVE BY DESDE LA CORDENADA DONDE ESTA SE MUEVE EL NUMERO DE ESPACIOS QUE LE DAS EJ. (LO DE ABAJO)
-        self.grid.move_by(self, (1,1)) #se mueve uno arriba en x y uno arriba en z
+        #self.grid.move_by(self, (1,1)) #se mueve uno arriba en x y uno arriba en z
         
     
     #def leerSemaforo(self, agenteSemaforo):
@@ -106,14 +135,21 @@ class modeloVehiculo(ap.Model):
         # Called at the start of the simulation
         global s
         s= self.p.size
+        origenCarros=llenarTuplaPosicionesCarros(self.p.agentsCarro)
         
         self.grid = ap.Grid(self, (s,s), track_empty=True)
+        
         self.vehiculos = ap.AgentList(self, self.p.agentsCarro, agenteVehiculo)
-        self.grid.add_agents(self.vehiculos, positions=[(0,0),(0,0),(0,0)]) #DEFINIR LAS POSICIONES INICIALES DE LOS AGENTES
-        self.vehiculos.setupParameters(self.p.velocidad,self.p.posX,self.p.posZ)
+        self.grid.add_agents(self.vehiculos, positions=origenCarros) #DEFINIR LAS POSICIONES INICIALES DE LOS AGENTES
+        
+        contador=0
+        for i in self.grid.positions:
+            self.vehiculos[contador].setupParameters(0,self.grid.positions[i])
+            contador=contador+1
+        
         self.semaforos = ap.AgentList(self, self.p.agentsSemaforo, agenteSemaforo)
-        self.grid.add_agents(self.semaforos, positions=[(4,4),(6,4),(4,6),(6,6)])
-        #self.agents.setupParameters(self.p.velocidad,self.p.posX,self.p.posZ)
+        self.grid.add_agents(self.semaforos, positions=[(4,4),(4,7),(7,4),(7,7)])
+    
 
     def step(self):
         # Called at every simulation step
@@ -139,14 +175,13 @@ class modeloVehiculo(ap.Model):
         self.report('Distancia recorrida por los vehiculos en el eje z', self.vehiculos.posZ)# Report a simulation result
         
 parameters = {
-    'size':10,
+    'size':12,
     'velocidad':0,
     'posX':0,
     'posZ':0,
-    'agentsCarro':3,
+    'agentsCarro':20,
     'agentsSemaforo':4,
     'steps':13,
-    'n_groups':3
 }
 
 

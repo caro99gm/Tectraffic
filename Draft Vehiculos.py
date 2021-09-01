@@ -1,4 +1,36 @@
+#Romel Aldair Vázquez Molina A01700519
+#Carolina Gómez Manzano A01632229
+#David Sánchez Magaña A01720476
+#Jose A. Kaun Sada A01720829
 
+
+#Implementación de agentes en Python
+#Avance 3
+
+#Descripción general:
+#En este avance el agente carro ya está al 90% de sus funcionalidades
+#El agente semaforo está al 50% de sus funcionalidades
+
+#Interacciones implementadas al momento:
+#El agente carro evita colisiones con otros agentes carro
+#El agente semaforo prende y apaga sus luces verdes y rojas
+#El agente carro puede ver el semaforo y avanza si la luz es verde, de otra forma se detiene
+#Al finalizar el recorrido, el agente se reposiciona en nuevas coordenadas para hacer un nuevo recorrido
+
+#SE PUEDE MODIFICAR DE LOS PARAMETROS
+#steps
+#agentsCarro
+
+#LIMITES
+#No poner más de 20 agentes carro
+#No modificar el tamaño de la malla, ese es fijo
+#No modificar la cantidad de agentes semaforo
+
+#Output
+#se imprime la posición de cada agente a en cada agente
+#Se imprime cuando un agente finaliza un recorrido
+
+#VARIABLES GLOBALES
 primerIzquierdo=True
 primerDerecho=True
 primerArriba=True
@@ -125,7 +157,7 @@ class agenteSemaforo(ap.Agent):
         else:
             self.tiempoActivo=self.tiempoActivo-1
             if(self.tiempoActivo==0):
-                self.tiempoEspera=15
+                self.tiempoEspera=17
                 self.luzVerde=False
                 self.luzRojo=True
             
@@ -184,25 +216,25 @@ class agenteVehiculo(ap.Agent):
             if(str(type(i))=="<class '__main__.agenteVehiculo'>"):
                 #Ir a la izquierda
                 if(carroIzquierda(self.posXInicial, self.posZInicial, self.posX)): #ej self(11,6) i(10,6)
-                    if(self.posX-i.posX==1):
+                    if(self.posX-i.posX==1 and self.posZ-i.posZ==0):
                         return True
                     
                 #ir hacia abajo
                 elif(carroAbajo(self.posXInicial, self.posZInicial, self.posZ)): #eje self (0,1) i(0,0)
-                    if(self.posZ-i.posZ==1):
+                    if(self.posZ-i.posZ==1 and self.posX-i.posX==0):
                         
                         return True
                     
                 #ir a la derecha 
                 elif(carroDerecha(self.posXInicial, self.posZInicial, self.posX)): #ej self(0,0) i(1,0)
                     #print(i.posX-self.posX)
-                    if(self.posX-i.posX==-1):
+                    if(self.posX-i.posX==-1 and self.posZ-i.posZ==0):
                         
                         return True
                     
                 #ir hacia arriba
                 elif(carroArriba(self.posXInicial, self.posZInicial, self.posZ)): #
-                    if(self.posZ-i.posZ==-1):
+                    if(self.posZ-i.posZ==-1 and self.posX-i.posX==0):
                         return True
         return False
     
@@ -216,11 +248,15 @@ class agenteVehiculo(ap.Agent):
         return False
     def end(self):
         global QUINCE, OCHO, SIETE, CERO
+        origenes=[(CERO,SIETE),(OCHO,CERO),(SIETE,QUINCE),(QUINCE,OCHO)]
+        nuevaPos=random.choice(origenes)
         if(carroIzquierda(self.posXInicial, self.posZInicial, 1)): #ej self(11,6) i(10,6)
             if(self.posX==CERO):
-                self.posX=QUINCE
-                self.posZ=OCHO
-                self.grid.move_to(self, (QUINCE,OCHO))
+                self.posX=nuevaPos[0]
+                self.posZ=nuevaPos[1]
+                self.posXInicial=nuevaPos[0]
+                self.posZInicial=nuevaPos[1]
+                self.grid.move_to(self, (self.posX,self.posZ))
                 self.vueltas=self.vueltas+1
                 self.primerSemaforo=True
                 return True
@@ -228,9 +264,11 @@ class agenteVehiculo(ap.Agent):
                 #ir hacia abajo
         elif(carroAbajo(self.posXInicial, self.posZInicial, 1)): #eje self (0,1) i(0,0)
             if(self.posZ==CERO):
-                self.posX=SIETE
-                self.posZ=QUINCE
-                self.grid.move_to(self, (SIETE,QUINCE))
+                self.posX=nuevaPos[0]
+                self.posZ=nuevaPos[1]
+                self.posXInicial=nuevaPos[0]
+                self.posZInicial=nuevaPos[1]
+                self.grid.move_to(self, (self.posX,self.posZ))
                 self.vueltas=self.vueltas+1
                 self.primerSemaforo=True
                 return True
@@ -238,9 +276,11 @@ class agenteVehiculo(ap.Agent):
                 #ir a la derecha 
         elif(carroDerecha(self.posXInicial, self.posZInicial, 1)): #ej self(0,0) i(1,0)
             if(self.posX==QUINCE):
-                self.posX=CERO
-                self.posZ=SIETE
-                self.grid.move_to(self, (CERO,SIETE))
+                self.posX=nuevaPos[0]
+                self.posZ=nuevaPos[1]
+                self.posXInicial=nuevaPos[0]
+                self.posZInicial=nuevaPos[1]
+                self.grid.move_to(self, (self.posX,self.posZ))
                 self.vueltas=self.vueltas+1
                 self.primerSemaforo=True
                 return True
@@ -248,13 +288,21 @@ class agenteVehiculo(ap.Agent):
                 #ir hacia arriba
         elif(carroArriba(self.posXInicial, self.posZInicial, 1)): #
             if(self.posZ==QUINCE):
-                self.posX=OCHO
-                self.posZ=CERO
-                self.grid.move_to(self, (OCHO,CERO))
+                self.posX=nuevaPos[0]
+                self.posZ=nuevaPos[1]
+                self.posXInicial=nuevaPos[0]
+                self.posZInicial=nuevaPos[1]
+                self.grid.move_to(self, (self.posX,self.posZ))
                 self.vueltas=self.vueltas+1
                 self.primerSemaforo=True
                 return True
         return False
+    
+    def desactivarPrimerSemaforo(self):
+        coordenadas=[(SIETE,SIETE),(SIETE,OCHO),(OCHO,SIETE),(OCHO,OCHO)]
+        for i in coordenadas:
+            if(self.posX==i[0] and self.posX==i[1]):
+                self.primerSemaforo=False
         
         
         #DIFERENCIA ENTRE MOVE TO Y MOVE BY
@@ -301,9 +349,9 @@ class modeloVehiculo(ap.Model):
                     contador=-1
             else:
                 if(contador==0):
-                    self.semaforos[contador].setupParameters(self.grid.positions[i], contador*5, 5, True, False) #como tiempo de espera es 0, tiene que estar prendida la luz verde
+                    self.semaforos[contador].setupParameters(self.grid.positions[i], (contador*5)+2, 5, True, False) #como tiempo de espera es 0, tiene que estar prendida la luz verde
                 else:
-                    self.semaforos[contador].setupParameters(self.grid.positions[i], contador*5, 5, False, True)
+                    self.semaforos[contador].setupParameters(self.grid.positions[i], (contador*5)+2, 5, False, True)
             contador=contador+1
     
 
@@ -311,8 +359,10 @@ class modeloVehiculo(ap.Model):
         # Called at every simulation step
         #self.agents.leerSemaforo(agenteSemaforo)
         #self.agents.detectarVehiculos(agenteVehiculo)
+        print(" ")
         for i in self.grid.positions:
             if(str(type(i))=="<class '__main__.agenteVehiculo'>"):
+                i.desactivarPrimerSemaforo()
                 if(i.end()==False):
                 #Falta meter un if para cuando el carro llegue a la interseccion y ponga self.primerSemaforo=false
                     if (i.choque() or i.verSemaforo()):
@@ -321,15 +371,15 @@ class modeloVehiculo(ap.Model):
                         i.actualizarPosicion()
                 else:
                     print("")
-                    print("Contador vueltas: ",i.vueltas)
+                    print(i," ","Contador vueltas: ",i.vueltas)
             elif(str(type(i))=="<class '__main__.agenteSemaforo'>"):
                 i.actualizarLuces()
         #IMPRESION DE LAS POSICIONES DE LOS AGENTES
         for i in self.grid.positions:
             if(str(type(i))=="<class '__main__.agenteVehiculo'>"):
-                print (self.grid.positions[i])
+                print (i,"coordenadas: ",self.grid.positions[i])
             #if(str(type(i))=="<class '__main__.agenteSemaforo'>"):
-                #print (i.tiempoActivo)
+                #print (i.luzVerde)
     
         
     def update(self):
@@ -341,14 +391,12 @@ class modeloVehiculo(ap.Model):
         # del agents
         # Called at the end of the simulation
         self.report('Vueltas al circuito', self.vehiculos.vueltas)
-        self.report('Distancia recorrida por los vehiculos en el eje x', self.vehiculos.posX)
-        self.report('Distancia recorrida por los vehiculos en el eje z', self.vehiculos.posZ)# Report a simulation result
+        self.report('eje x', self.vehiculos.posX)
+        self.report('eje z', self.vehiculos.posZ)# Report a simulation result
         
 parameters = {
     'size':16,
-    'posX':0,
-    'posZ':0,
-    'agentsCarro':1,
+    'agentsCarro':15,
     'agentsSemaforo':4,
     'steps':200,
 }

@@ -41,6 +41,8 @@ CERO=0
 QUINCE=15
 SIETE=7
 OCHO=8
+SEIS=6
+NUEVE=9
 
 # Model design
 import random
@@ -55,6 +57,36 @@ from IPython.display import HTML
 
 def funcionVacia():
     return True
+
+def SemaforoSeisSeis(inicioX, inicioZ):
+    global SEIS
+    if(inicioX==SEIS and inicioZ==SEIS):
+        return True
+    else:
+        return False
+
+def SemaforoSeisNueve(inicioX, inicioZ):
+    global SEIS, NUEVE
+    if(inicioX==SEIS and inicioZ==NUEVE):
+        return True
+    else:
+        return False
+    
+def SemaforoNueveNueve(inicioX, inicioZ):
+    global NUEVE
+    if(inicioX==NUEVE and inicioZ==NUEVE):
+        return True
+    else:
+        return False
+    
+def SemaforoNueveSeis(inicioX, inicioZ):
+    global NUEVE, SEIS
+    if(inicioX==NUEVE and inicioZ==SEIS):
+        return True
+    else:
+        return False
+    
+
 
 def llenarTuplaPosicionesCarros(cCarros):
     global SIETE, OCHO, CERO, QUINCE
@@ -125,6 +157,12 @@ class agenteSemaforo(ap.Agent):
         self.tiempoActivo=tiempoActivo #int (segundos)
         self.luzVerde=luzVerde #bool
         self.luzRojo=luzRojo#bool
+        if(tiempoEspera==2):
+            self.contar=True
+            self.actualizar=True
+        else:
+            self.contar=False
+            self.actualizar=False
         #self.semaforos[]=semaforos #array de semaforos, para comunicarse con otros agentes
         
     def actualizarTiempoEspera(self):
@@ -148,24 +186,65 @@ class agenteSemaforo(ap.Agent):
             
     def actualizarLuces(self):
         if(self.luzRojo):
-            self.tiempoEspera=self.tiempoEspera-1
-            if(self.tiempoEspera==0):
-                self.tiempoActivo=5
-                self.luzVerde=True
-                self.luzRojo=False
+            if(self.tiempoEspera>0):
+                self.tiempoEspera=self.tiempoEspera-1
+                if(self.tiempoEspera==0):
+                    self.contar=True
+                    self.actualizar=True
+                    #self.tiempoActivo=5
+                    self.luzVerde=True
+                    self.luzRojo=False
             
-        else:
-            self.tiempoActivo=self.tiempoActivo-1
-            if(self.tiempoActivo==0):
-                self.tiempoEspera=17
-                self.luzVerde=False
-                self.luzRojo=True
+        elif(self.luzVerde):
+            if(self.tiempoActivo>0):
+                self.tiempoActivo=self.tiempoActivo-1
+                if(self.tiempoActivo==0):
+                    self.tiempoEspera=2
+                    self.luzVerde=False
+                    self.luzRojo=True
             
         #self.actualizarTiempos(cantidadDeVehiculos)
         #self.encenderLuzVerde()
         #self.encenderLuzAmarilla()
         #self.encenderLuzRoja()
         
+        #def contarcarros
+            #para cada vecino a 5 vecino a 5 metros
+               #que sea un vehiculo
+                    #que la distancia en Y o X sea 0
+                        #contador++
+    def contarCarros(self):
+        if (self.contar==True):
+            self.contar=False
+            agentes=self.grid.neighbors(self, distance=5)
+            for i in agentes:
+                if(isinstance(i,agenteVehiculo)):
+                    if(carroIzquierda(i.posXInicial, i.posZInicial, i.posX) and SemaforoNueveNueve(self.posX, self.posZ)): #ej self(11,6) i(10,6)
+                        self.tiempoActivo=self.tiempoActivo+1
+                        
+                    #ir hacia abajo
+                    elif(carroAbajo(i.posXInicial, i.posZInicial, i.posZ) and SemaforoSeisNueve(self.posX, self.posZ)): #eje self (0,1) i(0,0)
+                        self.tiempoActivo=self.tiempoActivo+1
+                        
+                    #ir a la derecha 
+                    elif(carroDerecha(i.posXInicial, i.posZInicial, i.posX) and SemaforoSeisSeis(self.posX, self.posZ)): #ej self(0,0) i(1,0)
+                        #print(i.posX-self.posX)
+                        self.tiempoActivo=self.tiempoActivo+1
+                        
+                    #ir hacia arriba
+                    elif(carroArriba(i.posXInicial, i.posZInicial, i.posZ) and SemaforoNueveSeis(self.posX, self.posZ)): #
+                        self.tiempoActivo=self.tiempoActivo+1
+                
+    def actualizarTiempos(self):
+        if(self.actualizar==True):
+            self.actualizar=False
+            agentes=self.grid.neighbors(self, distance=4)
+            for i in agentes:
+                if(isinstance(i,agenteSemaforo)):
+                    i.tiempoEspera=i.tiempoEspera+self.tiempoActivo
+            #para cada vecino a 4 metros
+                #que sea un semaforo
+                    #tiempo de espera en nuevo semaforo=ese tiempo + contador del semaforo self
         
 class agenteVehiculo(ap.Agent):
 
@@ -213,7 +292,7 @@ class agenteVehiculo(ap.Agent):
     def choque(self):
         agentes=self.grid.neighbors(self, distance=1)
         for i in agentes:
-            if(str(type(i))=="<class '__main__.agenteVehiculo'>"):
+            if(isinstance(i,agenteVehiculo)):
                 #Ir a la izquierda
                 if(carroIzquierda(self.posXInicial, self.posZInicial, self.posX)): #ej self(11,6) i(10,6)
                     if(self.posX-i.posX==1 and self.posZ-i.posZ==0):
@@ -242,7 +321,7 @@ class agenteVehiculo(ap.Agent):
         if(self.primerSemaforo):
             agentes=self.grid.neighbors(self, distance=1)
             for i in agentes:
-                if(str(type(i))=="<class '__main__.agenteSemaforo'>"):
+                if(isinstance(i,agenteSemaforo)):
                     if(i.luzRojo):
                         return True
         return False
@@ -349,9 +428,9 @@ class modeloVehiculo(ap.Model):
                     contador=-1
             else:
                 if(contador==0):
-                    self.semaforos[contador].setupParameters(self.grid.positions[i], (contador*5)+2, 5, True, False) #como tiempo de espera es 0, tiene que estar prendida la luz verde
+                    self.semaforos[contador].setupParameters(self.grid.positions[i], (contador*2)+2, 2, True, False) #como tiempo de espera es 0, tiene que estar prendida la luz verde
                 else:
-                    self.semaforos[contador].setupParameters(self.grid.positions[i], (contador*5)+2, 5, False, True)
+                    self.semaforos[contador].setupParameters(self.grid.positions[i], (contador*2)+2, 2, False, True)
             contador=contador+1
     
 
@@ -360,8 +439,15 @@ class modeloVehiculo(ap.Model):
         #self.agents.leerSemaforo(agenteSemaforo)
         #self.agents.detectarVehiculos(agenteVehiculo)
         print(" ")
+        
+        #para cada semaforo
+            #semaforo cuenta vehiculos y actualiza propio tiempo Activo
+        
+        #para cada semaforo
+            #semaforo actualiza tiempo de espera de otros semaforo
+            
         for i in self.grid.positions:
-            if(str(type(i))=="<class '__main__.agenteVehiculo'>"):
+            if(isinstance(i,agenteVehiculo)):
                 i.desactivarPrimerSemaforo()
                 if(i.end()==False):
                 #Falta meter un if para cuando el carro llegue a la interseccion y ponga self.primerSemaforo=false
@@ -372,12 +458,17 @@ class modeloVehiculo(ap.Model):
                 else:
                     print("")
                     print(i," ","Contador vueltas: ",i.vueltas)
-            elif(str(type(i))=="<class '__main__.agenteSemaforo'>"):
+            elif(isinstance(i,agenteSemaforo)):
                 i.actualizarLuces()
+                i.contarCarros()
+                i.actualizarTiempos()
         #IMPRESION DE LAS POSICIONES DE LOS AGENTES
         for i in self.grid.positions:
-            if(str(type(i))=="<class '__main__.agenteVehiculo'>"):
+            if(isinstance(i,agenteVehiculo)):
                 print (i,"coordenadas: ",self.grid.positions[i])
+            elif(isinstance(i,agenteSemaforo)):
+                print(i,i.luzVerde)
+                print(i,i.luzRojo)
             #if(str(type(i))=="<class '__main__.agenteSemaforo'>"):
                 #print (i.luzVerde)
     
@@ -396,7 +487,7 @@ class modeloVehiculo(ap.Model):
         
 parameters = {
     'size':16,
-    'agentsCarro':15,
+    'agentsCarro':10,
     'agentsSemaforo':4,
     'steps':200,
 }

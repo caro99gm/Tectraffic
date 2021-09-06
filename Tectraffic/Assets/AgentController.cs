@@ -147,16 +147,17 @@ public class AgentController : MonoBehaviour
             {
                 // Get the last position for s
                 List<Vector3> last = positions[positions.Count - 1];
-                Debug.Log(last.Count);
+
                 // Get the previous to last position for s
                 List<Vector3> prevLast = positions[positions.Count - 2];
                 // Interpolate using dt
-                Vector3 interpolated = Vector3.Lerp(prevLast[s], last[s], dt);  //https://docs.unity3d.com/ScriptReference/Vector3.Lerp.html
+                Vector3 interpolated = Vector3.Lerp(prevLast[s]*4.0f, last[s]*4.0f, dt);  //https://docs.unity3d.com/ScriptReference/Vector3.Lerp.html
+                Debug.Log(interpolated);
                 agents[s].transform.localPosition = interpolated;
 
                 //apuntar en direccion
-                //Vector3 dir = last[s] - prevLast[s];
-                //agents[s].transform.rotation = Quaternion.LookRotation(dir);
+                Vector3 dir = last[s] - prevLast[s];
+                if (dir != Vector3.zero) agents[s].transform.rotation = Quaternion.LookRotation(dir);
             }
         }
     }

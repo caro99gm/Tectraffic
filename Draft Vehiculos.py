@@ -91,7 +91,7 @@ def SemaforoNueveSeis(inicioX, inicioZ):
 def llenarTuplaPosicionesCarros(cCarros):
     global SIETE, OCHO, CERO, QUINCE
     contador=0
-    origenes=[(CERO,SIETE),(OCHO,CERO),(SIETE,QUINCE),(QUINCE,OCHO)]
+    origenes=[(CERO,SIETE),(OCHO,CERO),(SIETE,QUINCE),(QUINCE,OCHO)] 
     tupla=[]
     while(contador!=cCarros):
         tupla.append(random.choice(origenes))
@@ -490,6 +490,8 @@ class modeloVehiculo(ap.Model):
                 i.contarCarros()
                 i.actualizarTiempos()
                 i.actualizarLuces()
+                
+        self.posc = self.grid.positions.values()
         #IMPRESION DE LAS POSICIONES DE LOS AGENTES
         for i in self.grid.positions:
             if(isinstance(i,agenteVehiculo)):
@@ -508,6 +510,10 @@ class modeloVehiculo(ap.Model):
         self.vehiculos.record('vueltas', self.vehiculos.vueltas)
         self.vehiculos.record('posX', self.vehiculos.posX)  # Record variable
         self.vehiculos.record('posZ', self.vehiculos.posZ)
+        
+    def getPosition(self):
+        return self.posc
+
 
     def end(self):
         # del agents
@@ -518,7 +524,7 @@ class modeloVehiculo(ap.Model):
         
 parameters = {
     'size':16,
-    'agentsCarro':30,
+    'agentsCarro':10,
     'agentsSemaforo':4,
     'steps':200,
 }

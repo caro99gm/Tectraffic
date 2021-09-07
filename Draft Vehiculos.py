@@ -350,8 +350,12 @@ class agenteVehiculo(ap.Agent):
             agentes=self.grid.neighbors(self, distance=1)
             for i in agentes:
                 if(isinstance(i,agenteSemaforo)):
+                    #print(i, i.luzRojo)
                     if(i.luzRojo):
+                        
                         return True
+                        
+        
         return False
     def end(self):
         global QUINCE, OCHO, SIETE, CERO
@@ -408,7 +412,7 @@ class agenteVehiculo(ap.Agent):
     def desactivarPrimerSemaforo(self):
         coordenadas=[(SIETE,SIETE),(SIETE,OCHO),(OCHO,SIETE),(OCHO,OCHO)]
         for i in coordenadas:
-            if(self.posX==i[0] and self.posX==i[1]):
+            if(self.posX==i[0] and self.posZ==i[1]):
                 self.primerSemaforo=False
         
         
@@ -483,23 +487,27 @@ class modeloVehiculo(ap.Model):
                         funcionVacia()
                     else:
                         i.actualizarPosicion()
+                        #print(i, i.posX, i.posZ)
                 else:
-                    print("")
-                    print(i," ","Contador vueltas: ",i.vueltas)
+                    funcionVacia()
+                    #print("")
+                    #print(i," ","Contador vueltas: ",i.vueltas)
             elif(isinstance(i,agenteSemaforo)):
                 i.contarCarros()
                 i.actualizarTiempos()
                 i.actualizarLuces()
-                
-        self.posc = self.grid.positions.values()
+               
+        self.posc=self.grid.positions.values()
+        
         #IMPRESION DE LAS POSICIONES DE LOS AGENTES
         for i in self.grid.positions:
             if(isinstance(i,agenteVehiculo)):
                 funcionVacia()
                 #print (i,"coordenadas: ",self.grid.positions[i])
             elif(isinstance(i,agenteSemaforo)):
-                print(i, "verde: " ,i.luzVerde)
-                print(i, "Rojo: " ,i.luzRojo)
+                funcionVacia()
+                #print(i, i.posX, i.posZ,"verde: " ,i.luzVerde)
+                #print(i, i.posX, i.posZ,"Rojo: " ,i.luzRojo)
                 #print(i,"(",i.posX," ",i.posZ,")"," Activo: ",i.tiempoActivo)
                 #print(i," Espera:",i.tiempoEspera)
             #if(str(type(i))=="<class '__main__.agenteSemaforo'>"):

@@ -20,9 +20,10 @@ public class AgentController : MonoBehaviour
     public int clonesOfAgent2;
 
     GameObject[] agents;
-    public float timeToUpdate = 5.0f;
+    public float timeToUpdate = 1.0f;
     private float timer;
     float dt;
+    bool newPos = false;
 
     // IEnumerator - yield return
     IEnumerator SendData(string data)
@@ -128,15 +129,24 @@ public class AgentController : MonoBehaviour
          *    timer ----  ?
          */
         timer -= Time.deltaTime;
-        dt = 1f - (timer / timeToUpdate);
+        Debug.Log(timer);
+        dt = 1.0f - (timer / timeToUpdate);
 
-        if(timer < 0)
+        if(timer < 0.2 && newPos == false)
         {
+            newPos = true;
 #if UNITY_EDITOR    //https://docs.unity3d.com/Manual/PlatformDependentCompilation.html
-            timer = timeToUpdate; // reset the timer
             Vector3 fakePos = new Vector3(3.44f, 0, -15.707f);
             string json = EditorJsonUtility.ToJson(fakePos);
             StartCoroutine(SendData(json));
+#endif
+        }
+
+        if (timer < 0)
+        {
+            newPos = false;
+#if UNITY_EDITOR    //https://docs.unity3d.com/Manual/PlatformDependentCompilation.html
+            timer = timeToUpdate; // reset the timer
 #endif
         }
 
@@ -153,6 +163,16 @@ public class AgentController : MonoBehaviour
                 // Interpolate using dt
                 Vector3 interpolated = Vector3.Lerp(prevLast[s]*4.0f, last[s]*4.0f, dt);  //https://docs.unity3d.com/ScriptReference/Vector3.Lerp.html
                 agents[s].transform.localPosition = interpolated;
+                //if (interpolated.magnitude != 1)
+                //{
+                //    //agents[s].transform.position = interpolated;
+                //    Debug.Log("hola");
+                //} else
+                //{
+                //    agents[s].transform.localPosition = interpolated;
+                //}
+
+
 
                 //apuntar en direccion
                 Vector3 dir = last[s]*4.0f - prevLast[s]*4.0f;

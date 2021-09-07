@@ -181,12 +181,19 @@ class agenteSemaforo(ap.Agent):
     #def encenderLuzRoja():
             
     def actualizarLuces(self):
+        condicion=True
         if(self.luzRojo):
             if(self.tiempoEspera>=0):
                 if(self.tiempoEspera==0):
+                    agentes=self.grid.neighbors(self, distance=5)
+                    for i in agentes:
+                        if(isinstance(i,agenteSemaforo)):
+                            if(i.luzVerde):
+                                condicion=False
+                    if(condicion):
                     #self.tiempoActivo=5
-                    self.luzVerde=True
-                    self.luzRojo=False
+                        self.luzVerde=True
+                        self.luzRojo=False
                 else:
                     self.tiempoEspera=self.tiempoEspera-1
                     

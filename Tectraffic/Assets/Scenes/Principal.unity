@@ -9511,9 +9511,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   prefabs:
   - {fileID: 3161609610375571159, guid: 71b9622c56835ab42b8e197d4bdc2f61, type: 3}
-  - {fileID: 1469007185134766239, guid: 338a12d8bd2560f4d8712b3b9db6df38, type: 3}
+  - {fileID: 8818068495630388747, guid: 76f01698b6c605a4382c8a5f730ffd7d, type: 3}
   - {fileID: 3225908364380379501, guid: 1f08b2c76086abb4f97e9d65c2d27eb6, type: 3}
-  - {fileID: 3697004190528123402, guid: 66c634c1a94254b499fdb628302c22c7, type: 3}
+  - {fileID: 8731336592182998294, guid: 66c634c1a94254b499fdb628302c22c7, type: 3}
   luzRoja: {fileID: 7172438956679773425, guid: 9b3fe71d999bb554187f1bbf3015717b, type: 3}
   luzVerde: {fileID: 8170833885187264538, guid: 2449f4fd8d2c598449b50dbe0f9397b2,
     type: 3}

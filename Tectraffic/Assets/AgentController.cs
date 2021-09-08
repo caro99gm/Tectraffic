@@ -170,8 +170,22 @@ public class AgentController : MonoBehaviour
                 if (s < clonesOfAgent1)
                 {
                     // Interpolate using dt
-                    Vector3 interpolated = Vector3.Lerp(prevLast[s] * 4.0f, last[s] * 4.0f, dt);  //https://docs.unity3d.com/ScriptReference/Vector3.Lerp.html
-                    agents[s].transform.localPosition = interpolated;
+                    //Vector3 interpolated = Vector3.Lerp(prevLast[s] * 4.0f, last[s] * 4.0f, dt);  //https://docs.unity3d.com/ScriptReference/Vector3.Lerp.html
+                    float dist = Vector3.Distance(prevLast[s] * 4.0f, last[s] * 4.0f);
+                    if (dist > 4)
+                    {
+                        Vector3 newPrevLast = new Vector3(prevLast[s].x, -3, prevLast[s].z);
+                        Vector3 newLast = new Vector3(last[s].x, -3, last[s].z);
+                        Vector3 interpolated = Vector3.Lerp(newPrevLast * 4.0f, newLast * 4.0f, dt);
+                        agents[s].transform.localPosition = interpolated;
+                    }
+                    else
+                    {
+                        Vector3 interpolated = Vector3.Lerp(prevLast[s] * 4.0f, last[s] * 4.0f, dt);
+                        agents[s].transform.localPosition = interpolated;
+                    }
+
+
                     //if (interpolated.magnitude != 1)
                     //{
                     //    //agents[s].transform.position = interpolated;

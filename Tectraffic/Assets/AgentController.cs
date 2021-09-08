@@ -13,13 +13,18 @@ using UnityEngine.Networking;
 public class AgentController : MonoBehaviour
 {
     List<List<Vector3>> positions;
-    public GameObject agent1Prefab;
-    public GameObject agent2Prefab;
+    public GameObject[] prefabs;
+    public GameObject luzRoja;
+    public GameObject luzVerde;
+
 
     public int clonesOfAgent1;
     public int clonesOfAgent2;
 
     GameObject[] agents;
+    GameObject[] semaforos;
+    Vector3[] positionSem;
+
     public float timeToUpdate = 1.0f;
     private float timer;
     float dt;
@@ -68,8 +73,9 @@ public class AgentController : MonoBehaviour
                     newPositions.Add(test);
                 }
 
+                int sumAgents = clonesOfAgent1 + clonesOfAgent2;
                 List<Vector3> poss = new List<Vector3>();
-                for(int s = 0; s < agents.Length; s++)
+                for(int s = 0; s < sumAgents; s++)
                 {
                     //spheres[s].transform.localPosition = newPositions[s];
                     poss.Add(newPositions[s]);
@@ -94,20 +100,18 @@ public class AgentController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        int numOfAgents = clonesOfAgent1 + clonesOfAgent2;
-        agents = new GameObject[numOfAgents];
-        for(int i = 0; i < numOfAgents; i++)
+        agents = new GameObject[clonesOfAgent1];
+        for (int i = 0; i < clonesOfAgent1; i++)
         {
-            if(i < clonesOfAgent1)
-            {
-                agents[i] = Instantiate(agent1Prefab, Vector3.zero, Quaternion.identity);
-            }
-            else
-            {
-                agents[i] = Instantiate(agent2Prefab, Vector3.zero, Quaternion.identity);
-            }
+            agents[i] = Instantiate(prefabs[UnityEngine.Random.Range(0, 4)], Vector3.zero, Quaternion.identity);
         }
 
+        positionSem = new[] { new Vector3(21.0f, 7.0f, 28.0f), new Vector3(27.0f, 7.0f, 40.0f), new Vector3(32.0f, 7.0f, 22.0f), new Vector3(38.0f, 7.0f, 34.0f) };
+        semaforos = new GameObject[clonesOfAgent2];
+        for (int i = 0; i < clonesOfAgent2; i++)
+        {
+            semaforos[i] = Instantiate(luzRoja, positionSem[i], Quaternion.identity);
+        }
 
         positions = new List<List<Vector3>>();
         Debug.Log(agents.Length);
@@ -129,7 +133,7 @@ public class AgentController : MonoBehaviour
          *    timer ----  ?
          */
         timer -= Time.deltaTime;
-        Debug.Log(timer);
+        //Debug.Log(timer);
         dt = 1.0f - (timer / timeToUpdate);
 
         if(timer < 0.2 && newPos == false)
@@ -153,30 +157,51 @@ public class AgentController : MonoBehaviour
 
         if (positions.Count > 1)
         {
-            for (int s = 0; s < agents.Length; s++)
+            int c = 0;
+            int agentSum = clonesOfAgent1 + clonesOfAgent2;
+            for (int s = 0; s < agentSum; s++)
             {
                 // Get the last position for s
                 List<Vector3> last = positions[positions.Count - 1];
 
                 // Get the previous to last position for s
                 List<Vector3> prevLast = positions[positions.Count - 2];
-                // Interpolate using dt
-                Vector3 interpolated = Vector3.Lerp(prevLast[s]*4.0f, last[s]*4.0f, dt);  //https://docs.unity3d.com/ScriptReference/Vector3.Lerp.html
-                agents[s].transform.localPosition = interpolated;
-                //if (interpolated.magnitude != 1)
-                //{
-                //    //agents[s].transform.position = interpolated;
-                //    Debug.Log("hola");
-                //} else
-                //{
-                //    agents[s].transform.localPosition = interpolated;
-                //}
+
+                if (s < clonesOfAgent1)
+                {
+                    // Interpolate using dt
+                    Vector3 interpolated = Vector3.Lerp(prevLast[s] * 4.0f, last[s] * 4.0f, dt);  //https://docs.unity3d.com/ScriptReference/Vector3.Lerp.html
+                    agents[s].transform.localPosition = interpolated;
+                    //if (interpolated.magnitude != 1)
+                    //{
+                    //    //agents[s].transform.position = interpolated;
+                    //    Debug.Log("hola");
+                    //} else
+                    //{
+                    //    agents[s].transform.localPosition = interpolated;
+                    //}
+                    //apuntar en direccion
+                    Vector3 dir = last[s] * 4.0f - prevLast[s] * 4.0f;
+                    if (dir != Vector3.zero) agents[s].transform.rotation = Quaternion.LookRotation(dir);
+                } 
+                else
+                {
+                    Destroy(semaforos[c]);
+                    if (last[s].x == 1)
+                    {
+                        semaforos[c] = Instantiate(luzVerde, positionSem[c], Quaternion.identity);
+                    } 
+                    else
+                    {
+                        semaforos[c] = Instantiate(luzRoja, positionSem[c], Quaternion.identity);
+                    }
+                    c++;
+                }
 
 
 
-                //apuntar en direccion
-                Vector3 dir = last[s]*4.0f - prevLast[s]*4.0f;
-                if (dir != Vector3.zero) agents[s].transform.rotation = Quaternion.LookRotation(dir);
+
+
             }
         }
     }

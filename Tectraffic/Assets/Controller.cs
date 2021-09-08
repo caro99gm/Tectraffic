@@ -10,7 +10,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
 
-public class AgentController : MonoBehaviour
+public class Controller : MonoBehaviour
 {
     List<List<Vector3>> positions;
     public GameObject agent1Prefab;
@@ -20,6 +20,7 @@ public class AgentController : MonoBehaviour
     public int clonesOfAgent2;
 
     GameObject[] agents;
+    GameObject[] semaforos;
     public float timeToUpdate = 1.0f;
     private float timer;
     float dt;
@@ -96,6 +97,7 @@ public class AgentController : MonoBehaviour
     {
         int numOfAgents = clonesOfAgent1 + clonesOfAgent2;
         agents = new GameObject[numOfAgents];
+        semaforos = new GameObject[clonesOfAgent2];
         for (int i = 0; i < numOfAgents; i++)
         {
             if (i < clonesOfAgent1)
@@ -104,7 +106,7 @@ public class AgentController : MonoBehaviour
             }
             else
             {
-                agents[i] = Instantiate(agent2Prefab, Vector3.zero, Quaternion.identity);
+                semaforos[i] = Instantiate(agent2Prefab, Vector3.zero, Quaternion.identity);
             }
         }
 
